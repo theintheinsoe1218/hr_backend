@@ -13,7 +13,6 @@ import java.util.List;
 @RequestMapping("/api/departments")
 @RequiredArgsConstructor
 @Tag(name = "Department Management", description = "APIs for managing departments")
-@CrossOrigin(origins = "*")
 public class DepartmentController {
 
     private final DepartmentRepository departmentRepository;
@@ -22,6 +21,14 @@ public class DepartmentController {
     @Operation(summary = "Get all departments")
     public List<Department> getAllDepartments() {
         return departmentRepository.findAll();
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get department by ID")
+    public ResponseEntity<Department> getDepartmentById(@PathVariable Long id) {
+        return departmentRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
