@@ -26,7 +26,7 @@ The server will start on `http://localhost:8080`.
 
 ## API Documentation
 Once the application is running, you can access the Swagger UI at:
-[http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+[http://localhost:8080/swagger-ui.html](http://localhost:8085/swagger-ui.html)
 
 ## API Endpoints
 - **Departments:** `/api/departments`
