@@ -37,9 +37,7 @@ public class UserController {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getUsername(),
-                            loginRequest.getPassword()
-                    )
-            );
+                            loginRequest.getPassword()));
             var user = userRepository.findByUsername(loginRequest.getUsername())
                     .orElseThrow(() -> new RuntimeException("User not found"));
             var jwtToken = jwtService.generateToken(user);
@@ -57,6 +55,34 @@ public class UserController {
     @Operation(summary = "Create a new user")
     public User createUser(@RequestBody User user) {
         return userRepository.save(user);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update a user")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.setUsername(userDetails.getUsername());
+                    if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
+                        user.setPassword(userDetails.getPassword());
+                    }
+                    if (userDetails.getRole() != null) {
+                        user.setRole(userDetails.getRole());
+                    }
+                    return ResponseEntity.ok(userRepository.save(user));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a user")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    userRepository.delete(user);
+                    return ResponseEntity.ok().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
 

@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import com.hr.model.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,13 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+        if (userDetails instanceof User user) {
+            extraClaims.put("role", user.getRole() != null ? user.getRole().getName() : null);
+            extraClaims.put("name", user.getUsername());
+            extraClaims.put("id", user.getId());
+        }
+        return generateToken(extraClaims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
@@ -75,7 +82,13 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        byte[] keyBytes;
+        try {
+            keyBytes = Decoders.BASE64.decode(secretKey);
+        } catch (Exception e) {
+            // Fallback to raw bytes if not valid Base64
+            keyBytes = secretKey.getBytes();
+        }
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }
